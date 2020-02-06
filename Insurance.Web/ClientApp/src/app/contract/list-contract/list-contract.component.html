@@ -1,0 +1,60 @@
+<h1>Contract</h1>
+
+<p *ngIf="!(models$ | async)"><em>Loading...</em></p>
+<p>
+  <a [routerLink]="['/contract/establish']" class="btn btn-primary float-right mb-3">New</a>
+</p>
+
+<table class="table table-sm table-hover" *ngIf="(models$ | async)?.length>0">
+  <thead>
+    <tr>
+      <th>From Name</th>
+      <th>To Name</th>
+      <th>Finished</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let model of (models$ | async)">
+      <td>{{ model.from.name }}</td>
+      <td>{{ model.to.name }}</td>
+      <td>{{ model.finished }}</td>
+      <td><a [routerLink]="" (click)="terminate(model.from.id, model.to.id)" class="btn btn-danger btn-sm float-right">Terminate</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<br />
+<hr />
+
+<h4> # Find Shortest Path</h4>
+<form [formGroup]="form" #formDir="ngForm" novalidate>
+  <div class="form-group row">
+    <div class="form-group col-md-4">
+      <label class=" control-label">From</label>
+      <select class="form-control" formControlName="from">
+        <option value="0">--Select--</option>
+        <option *ngFor="let part of (parts$ | async)" value={{part.id}}>
+          {{part.name}}
+        </option>
+      </select>
+    </div>
+    <div class="form-group col-md-4">
+      <label class="control-label">To</label>
+      <select class="form-control" formControlName="to">
+        <option value="0">--Select--</option>
+        <option *ngFor="let part of (parts$ | async)" value={{part.id}}>
+          {{part.name}}
+        </option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="form-group col-md-2">
+      <button class="btn btn-primary float-left" (click)="find()">Find</button>
+    </div>
+    <div class="form-group col-md-10">
+      <label class="control-label">{{result}}</label>
+    </div>
+  </div>
+ </form>

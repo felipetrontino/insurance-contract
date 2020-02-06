@@ -1,0 +1,35 @@
+<h1>Establish Contract</h1>
+<form [formGroup]="form" (ngSubmit)="save()" #formDir="ngForm" novalidate>
+  <div class="form-group row">
+    <label class=" control-label col-md-12">From</label>
+    <div class="col-md-12">
+      <select class="form-control" formControlName="from" >
+        <option value="0">--Select--</option>
+        <option *ngFor="let part of (parts$ | async)" value={{part.id}}>
+          {{part.name}}
+        </option>
+      </select>
+    </div>   
+    <span class="text-danger ml-3" *ngIf="from.invalid && formDir.submitted">
+      From is required.
+    </span>
+  </div> 
+  <div class="form-group row">
+    <label class=" control-label col-md-12">To</label>
+    <div class="col-md-12">
+      <select class="form-control" formControlName="to" >
+        <option value="0">--Select--</option>
+        <option *ngFor="let part of (parts$ | async)" value={{part.id}}>
+          {{part.name}}
+        </option>
+      </select>
+    </div>    
+    <span class="text-danger ml-3" *ngIf="to.invalid && formDir.submitted">
+      To is required.
+    </span>    
+  </div>   
+  <div class="form-group">
+    <button type="submit" class="btn btn-success float-right">Save</button>
+    <button class="btn btn-secondary float-left" (click)="cancel()">Cancel</button>
+  </div>
+</form>

@@ -1,14 +1,16 @@
-﻿using Insurance.Domain.Entities;
-using Insurance.Application.Interfaces;
+﻿using Insurance.Application.Interfaces;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
-using Insurance.Infra.Data;
+using Insurance.Core.Interfaces;
+using Insurance.Domain.Entities;
+using Insurance.Domain.Interfaces.Repository;
 
 namespace Insurance.Domain.Services
 {
     public class CarrierAppService : ContractPartAppService<CarrierInputModel, CarrierViewModel, Carrier>, ICarrierAppService
     {
-        public CarrierAppService(InsuranceDb db) : base(db)
+        public CarrierAppService(ICarrierRepository repo, IUnitOfWork uow)
+            : base(repo, uow)
         {
         }
 

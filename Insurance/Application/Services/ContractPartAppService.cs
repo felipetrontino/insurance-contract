@@ -2,10 +2,8 @@
 using Insurance.Core.Exceptions;
 using Insurance.Core.Interfaces;
 using Insurance.Domain.Common;
-using Insurance.Domain.Entities;
 using Insurance.Domain.Interfaces.Model;
-using Insurance.Infra.Data;
-using Microsoft.EntityFrameworkCore;
+using Insurance.Domain.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +16,13 @@ namespace Insurance.Domain.Services
         where TViewModel : class, IContractPart
         where TEntity : class, IContractPartEntity
     {
-        private readonly InsuranceDb _db;
+        protected readonly IContractPartRepository<TEntity> Repo;
+        protected readonly IUnitOfWork Uow;
 
-        protected ContractPartAppService(InsuranceDb db)
+        protected ContractPartAppService(IContractPartRepository<TEntity> repo, IUnitOfWork uow)
         {
-            _db = db;
+            Repo = repo;
+            Uow = uow;
         }
 
         public async Task Add(TInputModel model)
@@ -34,9 +34,9 @@ namespace Insurance.Domain.Services
 
             var entity = MapFromModel(model, null);
 
-            await _db.Set<TEntity>().AddAsync(entity);
+            await Repo.Add(entity);
 
-            await _db.SaveChangesAsync();
+            await Uow.Commit();
         }
 
         public async Task Update(Guid id, TInputModel model)
@@ -46,16 +46,16 @@ namespace Insurance.Domain.Services
 
             model.Validate();
 
-            var entity = await _db.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await Repo.Get(id);
 
             if (entity == null)
                 throw new ValidationBusinessException(ValidationMessage.EntityNotFound);
 
             entity = MapFromModel(model, entity);
 
-            _db.Set<TEntity>().Update(entity);
+            Repo.Update(entity);
 
-            await _db.SaveChangesAsync();
+            await Uow.Commit();
         }
 
         public async Task<TViewModel> Get(Guid id)
@@ -63,9 +63,7 @@ namespace Insurance.Domain.Services
             if (id == Guid.Empty)
                 throw new ValidationBusinessException(ValidationMessage.IdInvalid);
 
-            var entity = await _db.Set<TEntity>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await Repo.Get(id);
 
             if (entity == null)
                 throw new ValidationBusinessException(ValidationMessage.EntityNotFound);
@@ -75,7 +73,7 @@ namespace Insurance.Domain.Services
 
         public async Task<List<TViewModel>> GetAll()
         {
-            var entities = await _db.Set<TEntity>().AsNoTracking().ToListAsync();
+            var entities = await Repo.GetAll();
             return entities.Select(MapToModel).ToList();
         }
 
@@ -84,20 +82,14 @@ namespace Insurance.Domain.Services
             if (id == Guid.Empty)
                 throw new ValidationBusinessException(ValidationMessage.IdInvalid);
 
-            var entity = await _db.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await Repo.Get(id);
 
             if (entity == null)
                 throw new ValidationBusinessException(ValidationMessage.EntityNotFound);
 
-            var contracts = _db.Set<Contract>()
-                                .Where(x => x.FromId == id || x.ToId == id)
-                                .ToList();
+            Repo.Delete(entity);
 
-            _db.Set<Contract>().RemoveRange(contracts);
-
-            _db.Set<TEntity>().Remove(entity);
-
-            await _db.SaveChangesAsync();
+            await Uow.Commit();
         }
 
         protected abstract TEntity MapFromModel(TInputModel model, TEntity entity);

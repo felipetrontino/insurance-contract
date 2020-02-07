@@ -1,15 +1,17 @@
 ﻿using FluentAssertions;
+using Insurance.Application.Interfaces;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
 using Insurance.Core.Exceptions;
 using Insurance.Domain.Common;
 using Insurance.Domain.Entities;
-using Insurance.Domain.Services;
+using Insurance.Infra.CrossCutting;
 using Insurance.Infra.Data;
 using Insurance.Test.Common;
 using Insurance.Test.Mocks;
 using Insurance.Test.Mocks.Domain.Entities;
 using Insurance.Test.Mocks.Models.InputModel;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +22,19 @@ namespace Insurance.Test.ComponentTests
     public class AdvisorAppServiceTest
     {
         protected readonly IMockRepository<InsuranceDb> MockRepository;
+        protected readonly IAdvisorAppService Service;
 
         public AdvisorAppServiceTest()
         {
             MockRepository = new DbMockRepository<InsuranceDb>();
+
+            var provider = DependencyInjectorStub.Get((s, c) =>
+            {
+                BootStrapper.RegisterServices(s, c);
+                s.AddScoped(x => MockRepository.GetContext());
+            });
+
+            Service = provider.GetService<IAdvisorAppService>();
         }
 
         #region Add
@@ -136,12 +147,6 @@ namespace Insurance.Test.ComponentTests
 
             var entities = MockRepository.Query<Advisor>().ToList();
             entities.Should().BeEmpty();
-        }
-
-        private void Add(AdvisorInputModel model)
-        {
-            var service = new AdvisorAppService(MockRepository.GetContext());
-            service.Add(model).Wait();
         }
 
         #endregion Add
@@ -321,12 +326,6 @@ namespace Insurance.Test.ComponentTests
             entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
         }
 
-        private void Update(Guid id, AdvisorInputModel model)
-        {
-            var service = new AdvisorAppService(MockRepository.GetContext());
-            service.Update(id, model).Wait();
-        }
-
         #endregion Update
 
         #region Get
@@ -381,12 +380,6 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.EntityNotFound);
         }
 
-        private AdvisorViewModel Get(Guid id)
-        {
-            var service = new AdvisorAppService(MockRepository.GetContext());
-            return service.Get(id).GetAwaiter().GetResult();
-        }
-
         #endregion Get
 
         #region GetAll
@@ -420,12 +413,6 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             result.Should().BeEmpty();
-        }
-
-        private List<AdvisorViewModel> GetAll()
-        {
-            var service = new AdvisorAppService(MockRepository.GetContext());
-            return service.GetAll().GetAwaiter().GetResult();
         }
 
         #endregion GetAll
@@ -519,12 +506,31 @@ namespace Insurance.Test.ComponentTests
             contracts.Should().BeEmpty();
         }
 
-        private void Delete(Guid id)
+        #endregion Delete
+
+        private void Add(AdvisorInputModel model)
         {
-            var service = new AdvisorAppService(MockRepository.GetContext());
-            service.Delete(id).Wait();
+            Service.Add(model).Wait();
         }
 
-        #endregion Delete
+        private void Update(Guid id, AdvisorInputModel model)
+        {
+            Service.Update(id, model).Wait();
+        }
+
+        private AdvisorViewModel Get(Guid id)
+        {
+            return Service.Get(id).GetAwaiter().GetResult();
+        }
+
+        private List<AdvisorViewModel> GetAll()
+        {
+            return Service.GetAll().GetAwaiter().GetResult();
+        }
+
+        private void Delete(Guid id)
+        {
+            Service.Delete(id).Wait();
+        }
     }
 }

@@ -1,15 +1,19 @@
 ﻿using FluentAssertions;
-using Insurance.Domain.Common;
-using Insurance.Domain.Entities;
-using Insurance.Core.Exceptions;
+using Insurance.Application.Interfaces;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
+using Insurance.Core.Exceptions;
+using Insurance.Domain.Common;
+using Insurance.Domain.Entities;
 using Insurance.Domain.Services;
+using Insurance.Infra.CrossCutting;
 using Insurance.Infra.Data;
+using Insurance.Infra.Repositories;
 using Insurance.Test.Common;
 using Insurance.Test.Mocks;
 using Insurance.Test.Mocks.Domain.Entities;
 using Insurance.Test.Mocks.Models.InputModel;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +24,19 @@ namespace Insurance.Test.ComponentTests
     public class MgaAppServiceTest
     {
         protected readonly IMockRepository<InsuranceDb> MockRepository;
+        protected readonly IMgaAppService Service;
 
         public MgaAppServiceTest()
         {
             MockRepository = new DbMockRepository<InsuranceDb>();
+
+            var provider = DependencyInjectorStub.Get((s, c) =>
+            {
+                BootStrapper.RegisterServices(s, c);
+                s.AddScoped(x => MockRepository.GetContext());
+            });
+
+            Service = provider.GetService<IMgaAppService>();
         }
 
         #region Add
@@ -97,12 +110,6 @@ namespace Insurance.Test.ComponentTests
 
             var entities = MockRepository.Query<Mga>().ToList();
             entities.Should().BeEmpty();
-        }
-
-        private void Add(MgaInputModel model)
-        {
-            var service = new MgaAppService(MockRepository.GetContext());
-            service.Add(model).Wait();
         }
 
         #endregion Add
@@ -227,12 +234,6 @@ namespace Insurance.Test.ComponentTests
             entities.Should().BeEquivalentToEntity(new List<Mga>() { entityExpected });
         }
 
-        private void Update(Guid id, MgaInputModel model)
-        {
-            var service = new MgaAppService(MockRepository.GetContext());
-            service.Update(id, model).Wait();
-        }
-
         #endregion Update
 
         #region Get
@@ -287,12 +288,6 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.EntityNotFound);
         }
 
-        private MgaViewModel Get(Guid id)
-        {
-            var service = new MgaAppService(MockRepository.GetContext());
-            return service.Get(id).GetAwaiter().GetResult();
-        }
-
         #endregion Get
 
         #region GetAll
@@ -326,12 +321,6 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             result.Should().BeEmpty();
-        }
-
-        private List<MgaViewModel> GetAll()
-        {
-            var service = new MgaAppService(MockRepository.GetContext());
-            return service.GetAll().GetAwaiter().GetResult();
         }
 
         #endregion GetAll
@@ -425,12 +414,31 @@ namespace Insurance.Test.ComponentTests
             contracts.Should().BeEmpty();
         }
 
-        private void Delete(Guid id)
+        #endregion Delete
+
+        private void Add(MgaInputModel model)
         {
-            var service = new MgaAppService(MockRepository.GetContext());
-            service.Delete(id).Wait();
+            Service.Add(model).Wait();
         }
 
-        #endregion Delete
+        private void Update(Guid id, MgaInputModel model)
+        {
+            Service.Update(id, model).Wait();
+        }
+
+        private MgaViewModel Get(Guid id)
+        {
+            return Service.Get(id).GetAwaiter().GetResult();
+        }
+
+        private List<MgaViewModel> GetAll()
+        {
+            return Service.GetAll().GetAwaiter().GetResult();
+        }
+
+        private void Delete(Guid id)
+        {
+            Service.Delete(id).Wait();
+        }
     }
 }

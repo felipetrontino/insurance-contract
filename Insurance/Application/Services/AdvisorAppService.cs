@@ -1,15 +1,17 @@
-﻿using Insurance.Domain.Entities;
-using Insurance.Application.Interfaces;
+﻿using Insurance.Application.Interfaces;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
-using Insurance.Infra.Data;
+using Insurance.Core.Interfaces;
+using Insurance.Domain.Entities;
+using Insurance.Domain.Interfaces.Repository;
 using System;
 
 namespace Insurance.Domain.Services
 {
     public class AdvisorAppService : ContractPartAppService<AdvisorInputModel, AdvisorViewModel, Advisor>, IAdvisorAppService
     {
-        public AdvisorAppService(InsuranceDb db) : base(db)
+        public AdvisorAppService(IAdvisorRepository repo, IUnitOfWork uow)
+           : base(repo, uow)
         {
         }
 

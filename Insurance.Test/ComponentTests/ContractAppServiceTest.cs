@@ -1,19 +1,18 @@
 ﻿using FluentAssertions;
-using Insurance.Domain.Common;
-using Insurance.Domain.Services;
-using Insurance.Domain.Entities;
-using Insurance.Core.Exceptions;
+using Insurance.Application.Interfaces;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
-
-using Insurance.Domain.Services;
-
+using Insurance.Core.Exceptions;
+using Insurance.Domain.Common;
+using Insurance.Domain.Entities;
+using Insurance.Infra.CrossCutting;
 using Insurance.Infra.Data;
 using Insurance.Test.Common;
 using Insurance.Test.Mocks;
 using Insurance.Test.Mocks.Domain.Entities;
 using Insurance.Test.Mocks.Models.InputModel;
 using Insurance.Test.Mocks.Models.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,10 +23,19 @@ namespace Insurance.Test.ComponentTests
     public class ContractAppServiceTest
     {
         protected readonly IMockRepository<InsuranceDb> MockRepository;
+        protected readonly IContractAppService Service;
 
         public ContractAppServiceTest()
         {
             MockRepository = new DbMockRepository<InsuranceDb>();
+
+            var provider = DependencyInjectorStub.Get((s, c) =>
+            {
+                BootStrapper.RegisterServices(s, c);
+                s.AddScoped(x => MockRepository.GetContext());
+            });
+
+            Service = provider.GetService<IContractAppService>();
         }
 
         #region Establish
@@ -201,12 +209,6 @@ namespace Insurance.Test.ComponentTests
 
             var contracts = MockRepository.Query<Contract>().ToList();
             contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
-        }
-
-        private void Establish(ContractInputModel model)
-        {
-            var service = new ContractAppService(MockRepository.GetContext(), null);
-            service.Establish(model).Wait();
         }
 
         #endregion Establish
@@ -395,12 +397,6 @@ namespace Insurance.Test.ComponentTests
 
             var contracts = MockRepository.Query<Contract>().ToList();
             contracts.Should().BeEmpty();
-        }
-
-        private void Terminate(ContractInputModel model)
-        {
-            var service = new ContractAppService(MockRepository.GetContext(), null);
-            service.Terminate(model).Wait();
         }
 
         #endregion Terminate
@@ -815,12 +811,6 @@ namespace Insurance.Test.ComponentTests
             result.Should().BeEquivalentTo(new List<ContractPartViewModel>() { carrierViewModelExpected1, carrierViewModelExpected3 });
         }
 
-        private List<ContractPartViewModel> FindShortestPath(ContractInputModel model)
-        {
-            var service = new ContractAppService(MockRepository.GetContext(), new PathFinderService());
-            return service.FindShortestPath(model).GetAwaiter().GetResult();
-        }
-
         #endregion FindShortestPath
 
         #region GetAll
@@ -864,12 +854,6 @@ namespace Insurance.Test.ComponentTests
             result.Should().BeEmpty();
         }
 
-        private List<ContractViewModel> GetAll()
-        {
-            var service = new ContractAppService(MockRepository.GetContext(), null);
-            return service.GetAll().GetAwaiter().GetResult();
-        }
-
         #endregion GetAll
 
         #region GetParts
@@ -903,12 +887,6 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             result.Should().BeEmpty();
-        }
-
-        private List<ContractPartViewModel> GetParts()
-        {
-            var service = new ContractAppService(MockRepository.GetContext(), null);
-            return service.GetParts().GetAwaiter().GetResult();
         }
 
         #endregion GetParts
@@ -1050,12 +1028,6 @@ namespace Insurance.Test.ComponentTests
             result.Should().BeEquivalentTo(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2, nodeViewModelExpected3 });
         }
 
-        private List<NodeViewModel> GetNodes()
-        {
-            var service = new ContractAppService(MockRepository.GetContext(), null);
-            return service.GetNodes().GetAwaiter().GetResult();
-        }
-
         #endregion GetNodes
 
         #region GetEdges
@@ -1099,12 +1071,41 @@ namespace Insurance.Test.ComponentTests
             result.Should().BeEmpty();
         }
 
-        private List<EdgeViewModel> GetEdges()
+        #endregion GetEdges
+
+        private void Establish(ContractInputModel model)
         {
-            var service = new ContractAppService(MockRepository.GetContext(), null);
-            return service.GetEdges().GetAwaiter().GetResult();
+            Service.Establish(model).Wait();
         }
 
-        #endregion GetEdges
+        private void Terminate(ContractInputModel model)
+        {
+            Service.Terminate(model).Wait();
+        }
+
+        private List<ContractPartViewModel> FindShortestPath(ContractInputModel model)
+        {
+            return Service.FindShortestPath(model).GetAwaiter().GetResult();
+        }
+
+        private List<ContractViewModel> GetAll()
+        {
+            return Service.GetAll().GetAwaiter().GetResult();
+        }
+
+        private List<ContractPartViewModel> GetParts()
+        {
+            return Service.GetParts().GetAwaiter().GetResult();
+        }
+
+        private List<NodeViewModel> GetNodes()
+        {
+            return Service.GetNodes().GetAwaiter().GetResult();
+        }
+
+        private List<EdgeViewModel> GetEdges()
+        {
+            return Service.GetEdges().GetAwaiter().GetResult();
+        }
     }
 }

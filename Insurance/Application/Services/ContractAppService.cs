@@ -1,29 +1,33 @@
-﻿using Insurance.Domain.Common;
-using Insurance.Domain.Services;
-using Insurance.Domain.Entities;
-using Insurance.Core.Exceptions;
-using Insurance.Application.Interfaces;
+﻿using Insurance.Application.Interfaces;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
-using Insurance.Infra.Data;
+using Insurance.Core.Exceptions;
+using Insurance.Core.Interfaces;
+using Insurance.Domain.Common;
+using Insurance.Domain.Entities;
+using Insurance.Domain.Interfaces.Repository;
+using Insurance.Domain.Interfaces.Service;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Insurance.Domain.Interfaces.Service;
 
 namespace Insurance.Domain.Services
 {
     public class ContractAppService : IContractAppService
     {
-        private readonly InsuranceDb _db;
-        private readonly IPathFinderService _pathFinder;
+        private readonly IContractRepository _repo;
+        private readonly IPathFinderService _pathFinderService;
+        private readonly IUnitOfWork _uow;
+        private readonly IContractPartRepository _contractPartRepo;
 
-        public ContractAppService(InsuranceDb db, IPathFinderService pathFinder)
+        public ContractAppService(IContractRepository repo, IContractPartRepository contractPartRepo, IUnitOfWork uow, IPathFinderService pathFinderService)
         {
-            _db = db;
-            _pathFinder = pathFinder;
+            _repo = repo;
+            _contractPartRepo = contractPartRepo;
+            _uow = uow;
+            _pathFinderService = pathFinderService;
         }
 
         public async Task Establish(ContractInputModel model)
@@ -37,15 +41,16 @@ namespace Insurance.Domain.Services
             if (model.FromId == model.ToId)
                 throw new ValidationBusinessException(ValidationMessage.ContractInvalid);
 
-            var exists = Match(model).Any();
+            var exists = _repo.QueryMatchContract(model.FromId, model.ToId).Any();
 
             if (exists)
                 throw new ValidationBusinessException(ValidationMessage.ContractExists);
 
             var contract = new Contract() { FromId = model.FromId, ToId = model.ToId };
 
-            await _db.AddAsync(contract);
-            await _db.SaveChangesAsync();
+            await _repo.Add(contract);
+
+            await _uow.Commit();
         }
 
         public async Task Terminate(ContractInputModel model)
@@ -59,14 +64,16 @@ namespace Insurance.Domain.Services
             if (model.FromId == model.ToId)
                 throw new ValidationBusinessException(ValidationMessage.ContractInvalid);
 
-            var exists = Match(model).FirstOrDefault();
+            var entity = _repo.QueryMatchContract(model.FromId, model.ToId).FirstOrDefault();
 
-            if (exists == null)
+            if (entity == null)
                 throw new ValidationBusinessException(ValidationMessage.ContractNotExists);
 
-            exists.Finished = true;
+            entity.Finished = true;
 
-            await _db.SaveChangesAsync();
+            _repo.Update(entity);
+
+            await _uow.Commit();
         }
 
         public async Task<List<ContractPartViewModel>> FindShortestPath(ContractInputModel model)
@@ -90,9 +97,9 @@ namespace Insurance.Domain.Services
 
             if (edges.Count == 0) return result;
 
-            var ids = _pathFinder.FindShortestPath(nodes.Select(x => x.Id).ToArray(), edges.Select(x => new Guid[] { x.FromId, x.ToId }).ToList(), model.FromId, model.ToId);
+            var ids = _pathFinderService.FindShortestPath(nodes.Select(x => x.Id).ToArray(), edges.Select(x => new Guid[] { x.FromId, x.ToId }).ToList(), model.FromId, model.ToId);
 
-            var parts = await _db.Set<ContractPart>().Where(x => ids.Contains(x.Id)).ToListAsync();
+            var parts = await _contractPartRepo.GetAll(ids);
 
             result = parts.Select(x => new ContractPartViewModel()
             {
@@ -109,9 +116,9 @@ namespace Insurance.Domain.Services
 
         public Task<List<ContractViewModel>> GetAll()
         {
-            return (from contract in _db.Set<Contract>()
-                    join fromPart in _db.Set<ContractPart>() on contract.FromId equals fromPart.Id
-                    join toPart in _db.Set<ContractPart>() on contract.ToId equals toPart.Id
+            return (from contract in _repo.Query()
+                    join fromPart in _contractPartRepo.Query() on contract.FromId equals fromPart.Id
+                    join toPart in _contractPartRepo.Query() on contract.ToId equals toPart.Id
                     select new ContractViewModel()
                     {
                         From = new ContractViewModel.Part()
@@ -136,21 +143,20 @@ namespace Insurance.Domain.Services
 
         public async Task<List<ContractPartViewModel>> GetParts()
         {
-            return await _db.Set<ContractPart>()
-                .AsNoTracking()
-                .Select(x => new ContractPartViewModel()
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Address = x.Address,
-                    Phone = x.Phone
-                })
-                .ToListAsync();
+            return await _contractPartRepo.Query()
+                                         .Select(x => new ContractPartViewModel()
+                                         {
+                                             Id = x.Id,
+                                             Name = x.Name,
+                                             Address = x.Address,
+                                             Phone = x.Phone
+                                         })
+                                         .ToListAsync();
         }
 
         public async Task<List<NodeViewModel>> GetNodes()
         {
-            return await (from part in _db.Set<ContractPart>()
+            return await (from part in _contractPartRepo.Query()
                           select new NodeViewModel()
                           {
                               Id = part.Id,
@@ -162,7 +168,7 @@ namespace Insurance.Domain.Services
 
         public async Task<List<EdgeViewModel>> GetEdges()
         {
-            return await (from contract in _db.Set<Contract>()
+            return await (from contract in _repo.Query()
                           where !contract.Finished
                           select new EdgeViewModel()
                           {
@@ -171,13 +177,6 @@ namespace Insurance.Domain.Services
                           })
                           .AsNoTracking()
                           .ToListAsync();
-        }
-
-        private IQueryable<Contract> Match(ContractInputModel model)
-        {
-            return _db.Set<Contract>()
-                              .Where(x => (x.FromId == model.FromId && x.ToId == model.ToId)
-                                  || (x.FromId == model.ToId && x.ToId == model.FromId));
         }
     }
 }

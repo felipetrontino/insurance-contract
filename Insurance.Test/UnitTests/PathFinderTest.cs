@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Insurance.Core.Domain.Core;
+using Insurance.Domain.Services;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -21,7 +21,7 @@ namespace Insurance.Test.UnitTests
             var edges = new List<Guid[]> { new Guid[] { a, b }, new Guid[] { b, c }, new Guid[] { c, d } };
 
             // act
-            var finder = new PathFinder();
+            var finder = new PathFinderService();
             var results = finder.FindShortestPath(vertices, edges, vertices[0], vertices[3]);
 
             // assertation
@@ -42,7 +42,7 @@ namespace Insurance.Test.UnitTests
             var edges = new List<Guid[]> { new Guid[] { a, b }, new Guid[] { b, c }, new Guid[] { c, d }, new Guid[] { b, d } };
 
             // act
-            var finder = new PathFinder();
+            var finder = new PathFinderService();
             var results = finder.FindShortestPath(vertices, edges, vertices[0], vertices[3]);
 
             // assertation

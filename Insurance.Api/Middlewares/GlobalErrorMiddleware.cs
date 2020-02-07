@@ -1,4 +1,4 @@
-﻿using Insurance.Core.Domain.Exceptions;
+﻿using Insurance.Core.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;

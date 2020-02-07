@@ -1,6 +1,6 @@
-﻿using Insurance.Core.Domain.Interfaces.Service;
-using Insurance.Core.Domain.Models.InputModel;
-using Insurance.Core.Domain.Models.ViewModel;
+﻿using Insurance.Application.Interfaces;
+using Insurance.Application.Models.InputModel;
+using Insurance.Application.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,9 +12,9 @@ namespace Insurance.WebApi.Controllers
     [Route("[controller]")]
     public class ContractController : ControllerBase
     {
-        private readonly IContractService _service;
+        private readonly IContractAppService _service;
 
-        public ContractController(IContractService service)
+        public ContractController(IContractAppService service)
         {
             _service = service;
         }

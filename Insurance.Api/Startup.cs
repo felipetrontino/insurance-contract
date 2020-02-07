@@ -1,8 +1,10 @@
 using Insurance.Api.Middlewares;
-using Insurance.Core.Domain.Core;
-using Insurance.Core.Domain.Interfaces.Service;
-using Insurance.Core.Domain.Services;
-using Insurance.Core.Infra.Data;
+using Insurance.Domain.Services;
+using Insurance.Application.Interfaces;
+
+using Insurance.Domain.Services;
+
+using Insurance.Infra.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Insurance.Domain.Interfaces.Service;
 
 namespace Insurance.WebApi
 {
@@ -80,13 +83,17 @@ namespace Insurance.WebApi
 
         private void Register(IServiceCollection services)
         {
+            // Inject Infra
             services.AddDbContext<InsuranceDb>(opt => opt.UseInMemoryDatabase("Insurance"));
 
-            services.AddScoped<IAdvisorService, AdvisorService>();
-            services.AddScoped<ICarrierService, CarrierService>();
-            services.AddScoped<IMgaService, MgaService>();
-            services.AddScoped<IContractService, ContractService>();
-            services.AddScoped<IPathFinder, PathFinder>();
+            // Inject AppServices
+            services.AddScoped<IAdvisorAppService, AdvisorAppService>();
+            services.AddScoped<ICarrierAppService, CarrierAppService>();
+            services.AddScoped<IMgaAppService, MgaAppService>();
+            services.AddScoped<IContractAppService, ContractAppService>();
+
+            // Inject Services
+            services.AddScoped<IPathFinderService, PathFinderService>();
         }
     }
 }

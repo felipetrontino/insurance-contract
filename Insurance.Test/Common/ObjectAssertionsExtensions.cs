@@ -1,7 +1,7 @@
 ﻿using FluentAssertions.Collections;
 using FluentAssertions.Equivalency;
 using FluentAssertions.Primitives;
-using Insurance.Core.Domain.Interfaces.Entity;
+using Insurance.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 

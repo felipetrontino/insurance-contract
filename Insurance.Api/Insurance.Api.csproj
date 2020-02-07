@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Insurance.Core\Insurance.Core.csproj" />
+    <ProjectReference Include="..\Insurance\Insurance.csproj" />
   </ItemGroup>
-
-
 </Project>

@@ -4,6 +4,7 @@ using Insurance.Application.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Insurance.WebApi.Controllers
@@ -21,51 +22,67 @@ namespace Insurance.WebApi.Controllers
 
         [HttpPost]
         [Route("Establish")]
-        public async Task Establish(ContractInputModel model)
+        [ProducesResponseType(typeof(OkResult), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Establish(ContractInputModel model)
         {
             await _service.Establish(model);
+            return Ok();
         }
 
         [HttpPost]
         [Route("Terminate")]
-        public async Task Terminate(ContractInputModel model)
+        [ProducesResponseType(typeof(OkResult), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Terminate(ContractInputModel model)
         {
             await _service.Terminate(model);
+            return Ok();
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ContractViewModel>> Get()
+        [ProducesResponseType(typeof(List<ContractViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
         {
-            return await _service.GetAll();
+            return Ok(await _service.GetAll());
         }
 
         [HttpGet]
         [Route("Parts")]
-        public async Task<IEnumerable<ContractPartViewModel>> GetParts()
+        [ProducesResponseType(typeof(List<ContractPartViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetParts()
         {
-            return await _service.GetParts();
+            return Ok(await _service.GetParts());
         }
 
         [HttpGet]
         [Route("Nodes")]
-        public async Task<IEnumerable<NodeViewModel>> GetNodes()
+        [ProducesResponseType(typeof(List<NodeViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetNodes()
         {
-            return await _service.GetNodes();
+            return Ok(await _service.GetNodes());
         }
 
         [HttpGet]
         [Route("Edges")]
-        public async Task<IEnumerable<EdgeViewModel>> GetEdges()
+        [ProducesResponseType(typeof(List<EdgeViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEdges()
         {
-            return await _service.GetEdges();
+            return Ok(await _service.GetEdges());
         }
 
         [HttpGet]
         [Route("FindShortestPath")]
-        public async Task<IEnumerable<ContractPartViewModel>> FindShortestPath([FromQuery] Guid fromId, [FromQuery] Guid toId)
+        [ProducesResponseType(typeof(List<ContractPartViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> FindShortestPath([FromQuery] Guid fromId, [FromQuery] Guid toId)
         {
             var input = new ContractInputModel() { FromId = fromId, ToId = toId };
-            return await _service.FindShortestPath(input);
+            return Ok(await _service.FindShortestPath(input));
         }
     }
 }

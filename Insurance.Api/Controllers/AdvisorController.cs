@@ -4,6 +4,7 @@ using Insurance.Application.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Insurance.WebApi.Controllers
@@ -20,33 +21,46 @@ namespace Insurance.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task Add(AdvisorInputModel model)
+        [ProducesResponseType(typeof(OkResult), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Add(AdvisorInputModel model)
         {
             await _service.Add(model);
+            return Ok();
         }
 
         [HttpPut("{id}")]
-        public async Task Update(Guid id, AdvisorInputModel model)
+        [ProducesResponseType(typeof(OkResult), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Update(Guid id, AdvisorInputModel model)
         {
             await _service.Update(id, model);
+            return Ok();
         }
 
         [HttpGet]
-        public async Task<IEnumerable<AdvisorViewModel>> Get()
+        [ProducesResponseType(typeof(List<AdvisorViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
         {
-            return await _service.GetAll();
+            return Ok(await _service.GetAll());
         }
 
         [HttpGet("{id}")]
-        public async Task<AdvisorViewModel> Get(Guid id)
+        [ProducesResponseType(typeof(AdvisorViewModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get(Guid id)
         {
-            return await _service.Get(id);
+            return Ok(await _service.Get(id));
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete(Guid id)
+        [ProducesResponseType(typeof(OkResult), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _service.Delete(id);
+            return Ok();
         }
     }
 }

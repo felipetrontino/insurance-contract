@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Router } from "@angular/router";
-import { ContractInputModel, ContractViewModel, Part } from "../models/contract.model";
+import { AddContract, Contract, Part } from "../models/contract.model";
 import { ContractService } from "../services/contract.service";
 import { FormBuilder, FormGroup } from '@angular/forms';
 
@@ -11,7 +11,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   styleUrls: ['./list-contract.component.css']
 })
 export class ListContractComponent implements OnInit {
-  models$: Observable<ContractViewModel[]>;
+  models$: Observable<Contract[]>;
   form: FormGroup;
   parts$: Observable<Part[]>;
   formFromId: string;
@@ -42,7 +42,7 @@ export class ListContractComponent implements OnInit {
   terminate(fromId, toId): void {
     const ans = confirm('Do you want to terminate contract with fromId: ' + fromId + 'and toId' + toId);
     if (ans) {
-      let model: ContractInputModel = {
+      let model: AddContract = {
         fromId: fromId,
         toId: toId
       };
@@ -55,7 +55,7 @@ export class ListContractComponent implements OnInit {
   };
 
   find(): void {
-    let model: ContractInputModel = {
+    let model: AddContract = {
       fromId: this.form.get(this.formFromId).value,
       toId: this.form.get(this.formToId).value,
     };

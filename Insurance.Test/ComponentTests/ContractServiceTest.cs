@@ -55,7 +55,7 @@ namespace Insurance.Test.ComponentTests
             var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contractExpected });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.ContractExists);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contract });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
         }
 
         private void Establish(ContractInputModel model)
@@ -240,7 +240,7 @@ namespace Insurance.Test.ComponentTests
             contractExpected.Finished = true;
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contractExpected });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         [Fact]
@@ -271,7 +271,7 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.InputInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contract });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
         }
 
         [Fact]
@@ -302,7 +302,7 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.IdInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contract });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
         }
 
         [Fact]
@@ -333,7 +333,7 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.IdInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contract });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
         }
 
         [Fact]
@@ -364,7 +364,7 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.ContractInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToModel(new List<Contract>() { contract });
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
         }
 
         [Fact]
@@ -430,7 +430,9 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>() { carrier, mga });
+            var carrierViewModelExpected1 = ContractPartViewModelMock.Get(key);
+            var carrierViewModelExpected2 = ContractPartViewModelMock.Get(key2);
+            result.Should().BeEquivalentTo(new List<ContractPartViewModel>() { carrierViewModelExpected1, carrierViewModelExpected2 });
         }
 
         [Fact]
@@ -567,7 +569,7 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>());
+            result.Should().BeEmpty();
         }
 
         [Fact]
@@ -586,7 +588,7 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>());
+            result.Should().BeEmpty();
         }
 
         [Fact]
@@ -616,7 +618,7 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>());
+            result.Should().BeEmpty();
         }
 
         [Fact]
@@ -652,7 +654,10 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>() { carrier, mga, advisor });
+            var carrierViewModelExpected1 = ContractPartViewModelMock.Get(key);
+            var carrierViewModelExpected2 = ContractPartViewModelMock.Get(key2);
+            var carrierViewModelExpected3 = ContractPartViewModelMock.Get(key3);
+            result.Should().BeEquivalentTo(new List<ContractPartViewModel>() { carrierViewModelExpected1, carrierViewModelExpected2, carrierViewModelExpected3 });
         }
 
         [Fact]
@@ -689,7 +694,7 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>());
+            result.Should().BeEmpty();
         }
 
         [Fact]
@@ -726,7 +731,7 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>());
+            result.Should().BeEmpty();
         }
 
         [Fact]
@@ -762,7 +767,9 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>() { carrier, advisor });
+            var carrierViewModelExpected1 = ContractPartViewModelMock.Get(key);
+            var carrierViewModelExpected3 = ContractPartViewModelMock.Get(key3);
+            result.Should().BeEquivalentTo(new List<ContractPartViewModel>() { carrierViewModelExpected1, carrierViewModelExpected3 });
         }
 
         [Fact]
@@ -801,10 +808,12 @@ namespace Insurance.Test.ComponentTests
             var result = FindShortestPath(model);
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<ContractPart>() { carrier, advisor });
+            var carrierViewModelExpected1 = ContractPartViewModelMock.Get(key);
+            var carrierViewModelExpected3 = ContractPartViewModelMock.Get(key3);
+            result.Should().BeEquivalentTo(new List<ContractPartViewModel>() { carrierViewModelExpected1, carrierViewModelExpected3 });
         }
 
-        private List<ContractPart> FindShortestPath(ContractInputModel model)
+        private List<ContractPartViewModel> FindShortestPath(ContractInputModel model)
         {
             var service = new ContractService(MockRepository.GetContext(), new PathFinder());
             return service.FindShortestPath(model).GetAwaiter().GetResult();
@@ -838,7 +847,7 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             var contractViewModelExpected = ContractViewModelMock.Get(carrier, mga);
-            result.Should().BeEquivalentToModel(new List<ContractViewModel>() { contractViewModelExpected });
+            result.Should().BeEquivalentTo(new List<ContractViewModel>() { contractViewModelExpected });
         }
 
         [Fact]
@@ -879,7 +888,7 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             var contractPartViewModelExpected = ContractPartViewModelMock.Get(key);
-            result.Should().BeEquivalentToModel(new List<ContractPartViewModel>() { contractPartViewModelExpected });
+            result.Should().BeEquivalentTo(new List<ContractPartViewModel>() { contractPartViewModelExpected });
         }
 
         [Fact]
@@ -930,7 +939,7 @@ namespace Insurance.Test.ComponentTests
             // assertation
             var nodeViewModelExpected1 = NodeViewModelMock.Get(key);
             var nodeViewModelExpected2 = NodeViewModelMock.Get(key2);
-            result.Should().BeEquivalentToModel(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2 });
+            result.Should().BeEquivalentTo(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2 });
         }
 
         [Fact]
@@ -967,7 +976,7 @@ namespace Insurance.Test.ComponentTests
             // assertation
             var nodeViewModelExpected1 = NodeViewModelMock.Get(key);
             var nodeViewModelExpected2 = NodeViewModelMock.Get(key2);
-            result.Should().BeEquivalentToModel(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2 });
+            result.Should().BeEquivalentTo(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2 });
         }
 
         [Fact]
@@ -997,7 +1006,7 @@ namespace Insurance.Test.ComponentTests
             // assertation
             var nodeViewModelExpected1 = NodeViewModelMock.Get(key);
             var nodeViewModelExpected2 = NodeViewModelMock.Get(key2);
-            result.Should().BeEquivalentToModel(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2 });
+            result.Should().BeEquivalentTo(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2 });
         }
 
         [Fact]
@@ -1036,7 +1045,7 @@ namespace Insurance.Test.ComponentTests
             var nodeViewModelExpected1 = NodeViewModelMock.Get(key);
             var nodeViewModelExpected2 = NodeViewModelMock.Get(key2);
             var nodeViewModelExpected3 = NodeViewModelMock.Get(key3);
-            result.Should().BeEquivalentToModel(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2, nodeViewModelExpected3 });
+            result.Should().BeEquivalentTo(new List<NodeViewModel>() { nodeViewModelExpected1, nodeViewModelExpected2, nodeViewModelExpected3 });
         }
 
         private List<NodeViewModel> GetNodes()
@@ -1073,7 +1082,7 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             var edgeViewModelExpected = EdgeViewModelMock.Get(carrier.Id, mga.Id);
-            result.Should().BeEquivalentToModel(new List<EdgeViewModel>() { edgeViewModelExpected });
+            result.Should().BeEquivalentTo(new List<EdgeViewModel>() { edgeViewModelExpected });
         }
 
         [Fact]

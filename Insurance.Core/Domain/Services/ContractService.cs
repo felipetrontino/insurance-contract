@@ -68,7 +68,7 @@ namespace Insurance.Core.Domain.Services
             await _db.SaveChangesAsync();
         }
 
-        public async Task<List<ContractPart>> FindShortestPath(ContractInputModel model)
+        public async Task<List<ContractPartViewModel>> FindShortestPath(ContractInputModel model)
         {
             if (model == null)
                 throw new ValidationBusinessException(ValidationMessage.InputInvalid);
@@ -79,19 +79,31 @@ namespace Insurance.Core.Domain.Services
             if (model.FromId == model.ToId)
                 throw new ValidationBusinessException(ValidationMessage.ContractInvalid);
 
+            var result = Enumerable.Empty<ContractPartViewModel>().ToList();
+
             var nodes = await GetNodes();
 
-            if (nodes.Count == 0) return Enumerable.Empty<ContractPart>().ToList();
+            if (nodes.Count == 0) return result;
 
             var edges = await GetEdges();
 
-            if (edges.Count == 0) return Enumerable.Empty<ContractPart>().ToList();
+            if (edges.Count == 0) return result;
 
             var ids = _pathFinder.FindShortestPath(nodes.Select(x => x.Id).ToArray(), edges.Select(x => new Guid[] { x.FromId, x.ToId }).ToList(), model.FromId, model.ToId);
 
-            var result = await _db.Set<ContractPart>().Where(x => ids.Contains(x.Id)).ToListAsync();
+            var parts = await _db.Set<ContractPart>().Where(x => ids.Contains(x.Id)).ToListAsync();
 
-            return result.OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
+            result = parts.Select(x => new ContractPartViewModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Address = x.Address,
+                Phone = x.Phone
+            })
+            .OrderBy(x => Array.IndexOf(ids, x.Id))
+            .ToList();
+
+            return result;
         }
 
         public Task<List<ContractViewModel>> GetAll()

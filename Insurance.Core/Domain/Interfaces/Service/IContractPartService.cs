@@ -1,20 +1,20 @@
-﻿using Insurance.Core.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Insurance.Core.Domain.Interfaces.Service
 {
-    public interface IContractPartService<TEntity>
-        where TEntity : ContractPart
+    public interface IContractPartService<TInputModel, TViewModel>
+        where TInputModel : class
+        where TViewModel : class
     {
-        Task Add(TEntity model);
+        Task Add(TInputModel model);
 
-        Task Update(TEntity model);
+        Task Update(Guid id, TInputModel model);
 
-        Task<TEntity> Get(Guid id);
+        Task<TViewModel> Get(Guid id);
 
-        Task<List<TEntity>> GetAll();
+        Task<List<TViewModel>> GetAll();
 
         Task Delete(Guid id);
     }

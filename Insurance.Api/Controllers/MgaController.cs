@@ -1,5 +1,6 @@
-﻿using Insurance.Core.Domain.Entities;
-using Insurance.Core.Domain.Interfaces.Service;
+﻿using Insurance.Core.Domain.Interfaces.Service;
+using Insurance.Core.Domain.Models.InputModel;
+using Insurance.Core.Domain.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -19,27 +20,25 @@ namespace Insurance.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task Add(Mga entity)
+        public async Task Add(MgaInputModel model)
         {
-            entity.Id = Guid.NewGuid();
-            await _service.Add(entity);
+            await _service.Add(model);
         }
 
         [HttpPut("{id}")]
-        public async Task Update(Guid id, Mga entity)
+        public async Task Update(Guid id, MgaInputModel entity)
         {
-            entity.Id = id;
-            await _service.Update(entity);
+            await _service.Update(id, entity);
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Mga>> Get()
+        public async Task<IEnumerable<MgaViewModel>> Get()
         {
             return await _service.GetAll();
         }
 
         [HttpGet("{id}")]
-        public async Task<Mga> Get(Guid id)
+        public async Task<MgaViewModel> Get(Guid id)
         {
             return await _service.Get(id);
         }

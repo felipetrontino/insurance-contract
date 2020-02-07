@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ContractService } from '../services/contract.service';
-import { ContractInputModel, Part } from '../models/contract.model';
+import { AddContract, Part } from '../models/contract.model';
 
 @Component({
   selector: 'app-blog-post-add-edit',
@@ -43,7 +43,7 @@ export class AddContractComponent implements OnInit {
       return;
     }
 
-    let Model: ContractInputModel = {
+    let Model: AddContract = {
       fromId: this.form.get(this.formFromId).value,
       toId: this.form.get(this.formToId).value,
     };

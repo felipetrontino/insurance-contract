@@ -1,8 +1,9 @@
 ﻿using Insurance.Core.Domain.Enums;
+using Insurance.Core.Domain.Interfaces.Entity;
 
 namespace Insurance.Core.Domain.Entities
 {
-    public class ContractPart : BaseEntity
+    public class ContractPart : BaseEntity, IContractPartEntity
     {
         public ContractPartType Type { get; set; }
 

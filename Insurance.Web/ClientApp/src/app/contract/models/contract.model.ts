@@ -1,4 +1,4 @@
-export class ContractViewModel {
+export class Contract {
   from: Part;
   to: Part;
   finished: boolean;
@@ -11,8 +11,7 @@ export class Part {
   phone: string;
 }
 
-export class ContractInputModel {
-  
+export class AddContract {
   fromId: string;
-  toId: Part; 
+  toId: string;
 }

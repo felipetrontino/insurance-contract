@@ -2,11 +2,14 @@
 using Insurance.Core.Domain.Common;
 using Insurance.Core.Domain.Entities;
 using Insurance.Core.Domain.Exceptions;
+using Insurance.Core.Domain.Models.InputModel;
+using Insurance.Core.Domain.Models.ViewModel;
 using Insurance.Core.Domain.Services;
 using Insurance.Core.Infra.Data;
 using Insurance.Test.Common;
 using Insurance.Test.Mocks;
 using Insurance.Test.Mocks.Entities;
+using Insurance.Test.Mocks.Models.InputModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,24 +34,26 @@ namespace Insurance.Test.ComponentTests
             // arrange
             var key = Fake.GetKey();
 
-            var entity = AdvisorMock.Get(key);
+            var model = AdvisorInputModelMock.Get(key);
 
             // act
-            Add(entity);
+            Add(model);
 
             // assertation
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { entity });
+            var entityExpected = AdvisorMock.Get(key);
+            entityExpected.HealthStatus = entities[0].HealthStatus;
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
         }
 
         [Fact]
         public void AdvisorAddWithInputNull()
         {
             // arrange
-            var entity = AdvisorMock.Null;
+            var model = AdvisorInputModelMock.Null;
 
             // act
-            Action action = () => Add(entity);
+            Action action = () => Add(model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.InputInvalid);
@@ -63,11 +68,11 @@ namespace Insurance.Test.ComponentTests
             // arrange
             var key = Fake.GetKey();
 
-            var entity = AdvisorMock.Get(key);
-            entity.Name = null;
+            var model = AdvisorInputModelMock.Get(key);
+            model.Name = null;
 
             // act
-            Action action = () => Add(entity);
+            Action action = () => Add(model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
@@ -82,11 +87,11 @@ namespace Insurance.Test.ComponentTests
             // arrange
             var key = Fake.GetKey();
 
-            var entity = AdvisorMock.Get(key);
-            entity.Name = string.Empty;
+            var model = AdvisorInputModelMock.Get(key);
+            model.Name = string.Empty;
 
             // act
-            Action action = () => Add(entity);
+            Action action = () => Add(model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
@@ -95,10 +100,10 @@ namespace Insurance.Test.ComponentTests
             entities.Should().BeEmpty();
         }
 
-        private void Add(Advisor entity)
+        private void Add(AdvisorInputModel model)
         {
             var service = new AdvisorService(MockRepository.GetContext());
-            service.Add(entity).Wait();
+            service.Add(model).Wait();
         }
 
         #endregion Add
@@ -116,15 +121,17 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = AdvisorMock.Get(Fake.GetKey());
-            updateEntity.Id = entity.Id;
+            var key2 = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key2);
 
             // act
-            Update(updateEntity);
+            Update(entity.Id, model);
 
             // assertation
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { updateEntity });
+            var entityExpected = AdvisorMock.Get(key2);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
         }
 
         [Fact]
@@ -138,15 +145,34 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = AdvisorMock.Null;
+            var model = AdvisorInputModelMock.Null;
 
             // act
-            Action action = () => Update(updateEntity);
+            Action action = () => Update(entity.Id, model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.InputInvalid);
+
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { entity });
+            var entityExpected = AdvisorMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
+        }
+
+        [Fact]
+        public void AdvisorUpdateWithoutEntity()
+        {
+            // arrange
+            var key = Fake.GetKey();
+
+            var key2 = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key2);
+
+            // act
+            Action action = () => Update(Fake.GetId(key), model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.EntityNotFound);
         }
 
         [Fact]
@@ -160,17 +186,20 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = AdvisorMock.Get(Fake.GetKey());
-            updateEntity.Name = null;
+            var key2 = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key2);
+            model.Name = null;
 
             // act
-            Action action = () => Update(updateEntity);
+            Action action = () => Update(entity.Id, model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
 
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { entity });
+            var entityExpected = AdvisorMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
         }
 
         [Fact]
@@ -184,23 +213,26 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = AdvisorMock.Get(Fake.GetKey());
-            updateEntity.Name = string.Empty;
+            var key2 = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key2);
+            model.Name = string.Empty;
 
             // act
-            Action action = () => Update(updateEntity);
+            Action action = () => Update(entity.Id, model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
 
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { entity });
+            var entityExpected = AdvisorMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
         }
 
-        private void Update(Advisor entity)
+        private void Update(Guid id, AdvisorInputModel model)
         {
             var service = new AdvisorService(MockRepository.GetContext());
-            service.Update(entity).Wait();
+            service.Update(id, model).Wait();
         }
 
         #endregion Update
@@ -222,7 +254,8 @@ namespace Insurance.Test.ComponentTests
             var result = Get(entity.Id);
 
             // assertation
-            result.Should().BeEquivalentToModel(entity);
+            var viewModelExpected = AdvisorViewModelMock.Get(key);
+            result.Should().BeEquivalentTo(viewModelExpected);
         }
 
         [Fact]
@@ -250,13 +283,13 @@ namespace Insurance.Test.ComponentTests
             var key = Fake.GetKey();
 
             // act
-            var result = Get(Fake.GetId(key));
+            Action action = () => Get(Fake.GetId(key));
 
             // assertation
-            result.Should().BeNull();
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.EntityNotFound);
         }
 
-        private Advisor Get(Guid id)
+        private AdvisorViewModel Get(Guid id)
         {
             var service = new AdvisorService(MockRepository.GetContext());
             return service.Get(id).GetAwaiter().GetResult();
@@ -281,7 +314,8 @@ namespace Insurance.Test.ComponentTests
             var result = GetAll();
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<Advisor>() { entity });
+            var viewModelExpected = AdvisorViewModelMock.Get(key);
+            result.Should().BeEquivalentTo(new List<AdvisorViewModel>() { viewModelExpected });
         }
 
         [Fact]
@@ -296,7 +330,7 @@ namespace Insurance.Test.ComponentTests
             result.Should().BeEmpty();
         }
 
-        private List<Advisor> GetAll()
+        private List<AdvisorViewModel> GetAll()
         {
             var service = new AdvisorService(MockRepository.GetContext());
             return service.GetAll().GetAwaiter().GetResult();
@@ -343,7 +377,8 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.IdInvalid);
 
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { entity });
+            var entityExpected = AdvisorMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
         }
 
         [Fact]
@@ -385,7 +420,8 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             var entities = MockRepository.Query<Advisor>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Advisor>() { entity2 });
+            var entityExpected = AdvisorMock.Get(key2);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
 
             var contracts = MockRepository.Query<Contract>().ToList();
             contracts.Should().BeEmpty();

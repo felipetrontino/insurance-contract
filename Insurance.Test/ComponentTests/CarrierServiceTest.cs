@@ -2,11 +2,14 @@
 using Insurance.Core.Domain.Common;
 using Insurance.Core.Domain.Entities;
 using Insurance.Core.Domain.Exceptions;
+using Insurance.Core.Domain.Models.InputModel;
+using Insurance.Core.Domain.Models.ViewModel;
 using Insurance.Core.Domain.Services;
 using Insurance.Core.Infra.Data;
 using Insurance.Test.Common;
 using Insurance.Test.Mocks;
 using Insurance.Test.Mocks.Entities;
+using Insurance.Test.Mocks.Models.InputModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,24 +34,25 @@ namespace Insurance.Test.ComponentTests
             // arrange
             var key = Fake.GetKey();
 
-            var entity = CarrierMock.Get(key);
+            var model = CarrierInputModelMock.Get(key);
 
             // act
-            Add(entity);
+            Add(model);
 
             // assertation
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { entity });
+            var entityExpected = CarrierMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
         }
 
         [Fact]
         public void CarrierAddWithInputNull()
         {
             // arrange
-            var entity = CarrierMock.Null;
+            var model = CarrierInputModelMock.Null;
 
             // act
-            Action action = () => Add(entity);
+            Action action = () => Add(model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.InputInvalid);
@@ -63,11 +67,11 @@ namespace Insurance.Test.ComponentTests
             // arrange
             var key = Fake.GetKey();
 
-            var entity = CarrierMock.Get(key);
-            entity.Name = null;
+            var model = CarrierInputModelMock.Get(key);
+            model.Name = null;
 
             // act
-            Action action = () => Add(entity);
+            Action action = () => Add(model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
@@ -82,11 +86,11 @@ namespace Insurance.Test.ComponentTests
             // arrange
             var key = Fake.GetKey();
 
-            var entity = CarrierMock.Get(key);
-            entity.Name = string.Empty;
+            var model = CarrierInputModelMock.Get(key);
+            model.Name = string.Empty;
 
             // act
-            Action action = () => Add(entity);
+            Action action = () => Add(model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
@@ -95,10 +99,10 @@ namespace Insurance.Test.ComponentTests
             entities.Should().BeEmpty();
         }
 
-        private void Add(Carrier entity)
+        private void Add(CarrierInputModel model)
         {
             var service = new CarrierService(MockRepository.GetContext());
-            service.Add(entity).Wait();
+            service.Add(model).Wait();
         }
 
         #endregion Add
@@ -116,15 +120,16 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = CarrierMock.Get(Fake.GetKey());
-            updateEntity.Id = entity.Id;
+            var key2 = Fake.GetKey();
+            var model = CarrierInputModelMock.Get(key2);
 
             // act
-            Update(updateEntity);
+            Update(entity.Id, model);
 
             // assertation
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { updateEntity });
+            var entityExpected = CarrierMock.Get(key2);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
         }
 
         [Fact]
@@ -138,15 +143,34 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = CarrierMock.Null;
+            var model = CarrierInputModelMock.Null;
 
             // act
-            Action action = () => Update(updateEntity);
+            Action action = () => Update(entity.Id, model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.InputInvalid);
+
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { entity });
+            var entityExpected = CarrierMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
+        }
+
+        [Fact]
+        public void CarrierUpdateWithoutEntity()
+        {
+            // arrange
+            var key = Fake.GetKey();
+
+            var key2 = Fake.GetKey();
+
+            var model = CarrierInputModelMock.Get(key2);
+
+            // act
+            Action action = () => Update(Fake.GetId(key), model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.EntityNotFound);
         }
 
         [Fact]
@@ -160,17 +184,20 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = CarrierMock.Get(Fake.GetKey());
-            updateEntity.Name = null;
+            var key2 = Fake.GetKey();
+
+            var model = CarrierInputModelMock.Get(key2);
+            model.Name = null;
 
             // act
-            Action action = () => Update(updateEntity);
+            Action action = () => Update(entity.Id, model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
 
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { entity });
+            var entityExpected = CarrierMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
         }
 
         [Fact]
@@ -184,23 +211,26 @@ namespace Insurance.Test.ComponentTests
 
             MockRepository.Commit();
 
-            var updateEntity = CarrierMock.Get(Fake.GetKey());
-            updateEntity.Name = string.Empty;
+            var key2 = Fake.GetKey();
+
+            var model = CarrierInputModelMock.Get(key2);
+            model.Name = string.Empty;
 
             // act
-            Action action = () => Update(updateEntity);
+            Action action = () => Update(entity.Id, model);
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
 
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { entity });
+            var entityExpected = CarrierMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
         }
 
-        private void Update(Carrier entity)
+        private void Update(Guid id, CarrierInputModel model)
         {
             var service = new CarrierService(MockRepository.GetContext());
-            service.Update(entity).Wait();
+            service.Update(id, model).Wait();
         }
 
         #endregion Update
@@ -222,7 +252,8 @@ namespace Insurance.Test.ComponentTests
             var result = Get(entity.Id);
 
             // assertation
-            result.Should().BeEquivalentToModel(entity);
+            var viewModelExpected = CarrierViewModelMock.Get(key);
+            result.Should().BeEquivalentTo(viewModelExpected);
         }
 
         [Fact]
@@ -250,13 +281,13 @@ namespace Insurance.Test.ComponentTests
             var key = Fake.GetKey();
 
             // act
-            var result = Get(Fake.GetId(key));
+            Action action = () => Get(Fake.GetId(key));
 
             // assertation
-            result.Should().BeNull();
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.EntityNotFound);
         }
 
-        private Carrier Get(Guid id)
+        private CarrierViewModel Get(Guid id)
         {
             var service = new CarrierService(MockRepository.GetContext());
             return service.Get(id).GetAwaiter().GetResult();
@@ -281,7 +312,8 @@ namespace Insurance.Test.ComponentTests
             var result = GetAll();
 
             // assertation
-            result.Should().BeEquivalentToModel(new List<Carrier>() { entity });
+            var viewModelExpected = CarrierViewModelMock.Get(key);
+            result.Should().BeEquivalentTo(new List<CarrierViewModel>() { viewModelExpected });
         }
 
         [Fact]
@@ -296,7 +328,7 @@ namespace Insurance.Test.ComponentTests
             result.Should().BeEmpty();
         }
 
-        private List<Carrier> GetAll()
+        private List<CarrierViewModel> GetAll()
         {
             var service = new CarrierService(MockRepository.GetContext());
             return service.GetAll().GetAwaiter().GetResult();
@@ -343,7 +375,8 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.IdInvalid);
 
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { entity });
+            var entityExpected = CarrierMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
         }
 
         [Fact]
@@ -385,7 +418,8 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             var entities = MockRepository.Query<Carrier>().ToList();
-            entities.Should().BeEquivalentToModel(new List<Carrier>() { entity2 });
+            var entityExpected = CarrierMock.Get(key2);
+            entities.Should().BeEquivalentToEntity(new List<Carrier>() { entityExpected });
 
             var contracts = MockRepository.Query<Contract>().ToList();
             contracts.Should().BeEmpty();

@@ -1,18 +1,17 @@
 ﻿using Insurance.Core.Domain.Entities;
-using Insurance.Core.Domain.Enums;
+using Insurance.Core.Domain.Models.ViewModel;
 
-namespace Insurance.Test.Mocks.Entities
+namespace Insurance.Test.Mocks.Models.InputModel
 {
-    public class AdvisorMock : MockBuilder<AdvisorMock, Advisor>
+    public class AdvisorViewModelMock : MockBuilder<AdvisorViewModelMock, AdvisorViewModel>
     {
-        public static Advisor Get(string key)
+        public static AdvisorViewModel Get(string key)
         {
             return Create(key).Default().Build();
         }
 
-        public AdvisorMock Default()
+        public AdvisorViewModelMock Default()
         {
-            Value.Type = ContractPartType.Advisor;
             Value.Name = Fake.GetName(Key);
             Value.LastName = Fake.GetLastName(Key);
             Value.Address = Fake.GetAddress(Key);

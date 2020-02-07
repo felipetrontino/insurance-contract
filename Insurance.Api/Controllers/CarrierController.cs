@@ -1,5 +1,6 @@
-﻿using Insurance.Core.Domain.Entities;
-using Insurance.Core.Domain.Interfaces.Service;
+﻿using Insurance.Core.Domain.Interfaces.Service;
+using Insurance.Core.Domain.Models.InputModel;
+using Insurance.Core.Domain.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -19,27 +20,25 @@ namespace Insurance.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task Add(Carrier entity)
+        public async Task Add(CarrierInputModel model)
         {
-            entity.Id = Guid.NewGuid();
-            await _service.Add(entity);
+            await _service.Add(model);
         }
 
         [HttpPut("{id}")]
-        public async Task Update(Guid id, Carrier entity)
+        public async Task Update(Guid id, CarrierInputModel model)
         {
-            entity.Id = id;
-            await _service.Update(entity);
+            await _service.Update(id, model);
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Carrier>> Get()
+        public async Task<IEnumerable<CarrierViewModel>> Get()
         {
             return await _service.GetAll();
         }
 
         [HttpGet("{id}")]
-        public async Task<Carrier> Get(Guid id)
+        public async Task<CarrierViewModel> Get(Guid id)
         {
             return await _service.Get(id);
         }

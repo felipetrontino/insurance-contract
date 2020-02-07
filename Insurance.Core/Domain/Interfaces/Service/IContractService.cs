@@ -1,5 +1,4 @@
-﻿using Insurance.Core.Domain.Entities;
-using Insurance.Core.Domain.Models.InputModel;
+﻿using Insurance.Core.Domain.Models.InputModel;
 using Insurance.Core.Domain.Models.ViewModel;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,7 +11,7 @@ namespace Insurance.Core.Domain.Interfaces.Service
 
         Task Terminate(ContractInputModel model);
 
-        Task<List<ContractPart>> FindShortestPath(ContractInputModel model);
+        Task<List<ContractPartViewModel>> FindShortestPath(ContractInputModel model);
 
         Task<List<ContractViewModel>> GetAll();
 

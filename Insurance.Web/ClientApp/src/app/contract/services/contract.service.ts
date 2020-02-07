@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { ContractInputModel, ContractViewModel, Part } from '../models/contract.model';
+import { AddContract, Contract, Part } from '../models/contract.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,8 +21,8 @@ export class ContractService {
     this.myApiUrl = environment.appUrl + '/Contract/';
   }
 
-  getContracts(): Observable<ContractViewModel[]> {
-    return this.http.get<ContractViewModel[]>(this.myApiUrl)
+  getContracts(): Observable<Contract[]> {
+    return this.http.get<Contract[]>(this.myApiUrl)
       .pipe(
         retry(1),
         catchError(this.errorHandler)
@@ -37,16 +37,16 @@ export class ContractService {
       );
   }
 
-  establishContract(model): Observable<ContractInputModel> {
-    return this.http.post<ContractInputModel>(this.myApiUrl + "Establish", JSON.stringify(model), this.httpOptions)
+  establishContract(model): Observable<AddContract> {
+    return this.http.post<AddContract>(this.myApiUrl + "Establish", JSON.stringify(model), this.httpOptions)
       .pipe(
         retry(1),
         catchError(this.errorHandler)
       );
   }
 
-  terminateContract(model): Observable<ContractInputModel> {
-    return this.http.post<ContractInputModel>(this.myApiUrl + "Terminate", JSON.stringify(model), this.httpOptions)
+  terminateContract(model): Observable<Contract> {
+    return this.http.post<Contract>(this.myApiUrl + "Terminate", JSON.stringify(model), this.httpOptions)
       .pipe(
         retry(1),
         catchError(this.errorHandler)

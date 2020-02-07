@@ -5,6 +5,7 @@ namespace Insurance.Core.Domain.Models.ViewModel
     public class ContractViewModel
     {
         public Part From { get; set; }
+
         public Part To { get; set; }
 
         public bool Finished { get; set; }
@@ -12,6 +13,7 @@ namespace Insurance.Core.Domain.Models.ViewModel
         public class Part
         {
             public Guid Id { get; set; }
+
             public string Name { get; set; }
 
             public string Address { get; set; }

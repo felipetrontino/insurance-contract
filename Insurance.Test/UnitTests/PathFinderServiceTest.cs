@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Insurance.Test.UnitTests
 {
-    public class PathFinderTest
+    public class PathFinderServiceTest
     {
         [Fact]
         public void FindShortestPathValid()

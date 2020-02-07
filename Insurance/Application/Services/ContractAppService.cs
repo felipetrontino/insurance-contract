@@ -41,7 +41,7 @@ namespace Insurance.Domain.Services
             if (model.FromId == model.ToId)
                 throw new ValidationBusinessException(ValidationMessage.ContractInvalid);
 
-            var exists = _repo.QueryMatchContract(model.FromId, model.ToId).Any();
+            var exists = _repo.QueryMatchContract(model.FromId, model.ToId).Any(x => !x.Finished);
 
             if (exists)
                 throw new ValidationBusinessException(ValidationMessage.ContractExists);
@@ -68,6 +68,9 @@ namespace Insurance.Domain.Services
 
             if (entity == null)
                 throw new ValidationBusinessException(ValidationMessage.ContractNotExists);
+
+            if (entity.Finished)
+                throw new ValidationBusinessException(ValidationMessage.ContractFinished);
 
             entity.Finished = true;
 
@@ -156,14 +159,14 @@ namespace Insurance.Domain.Services
 
         public async Task<List<NodeViewModel>> GetNodes()
         {
-            return await (from part in _contractPartRepo.Query()
-                          select new NodeViewModel()
+            return await _contractPartRepo.Query()
+                          .Select(x => new NodeViewModel()
                           {
-                              Id = part.Id,
-                              Name = part.Name
+                              Id = x.Id,
+                              Name = x.Name
                           })
-                    .AsNoTracking()
-                    .ToListAsync();
+                        .AsNoTracking()
+                        .ToListAsync();
         }
 
         public async Task<List<EdgeViewModel>> GetEdges()

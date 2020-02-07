@@ -62,9 +62,8 @@ namespace Insurance.Test.ComponentTests
             Establish(model);
 
             // assertation
-            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
-
             var contracts = MockRepository.Query<Contract>().ToList();
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
             contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
@@ -208,7 +207,42 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.ContractExists);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
+        }
+
+        [Fact]
+        public void ContractEstablishWithContractFinished()
+        {
+            // arrange
+            var key = Fake.GetKey();
+            var carrier = CarrierMock.Get(key);
+
+            MockRepository.Add(carrier);
+
+            var key2 = Fake.GetKey();
+            var mga = MgaMock.Get(key2);
+
+            MockRepository.Add(mga);
+
+            var contract = ContractMock.Get(carrier.Id, mga.Id);
+            contract.Finished = true;
+
+            MockRepository.Add(contract);
+
+            MockRepository.Commit();
+
+            var model = ContractInputModelMock.Get(carrier.Id, mga.Id);
+
+            // act
+            Establish(model);
+
+            // assertation
+            var contracts = MockRepository.Query<Contract>().ToList();
+            var contractExpected1 = ContractMock.Get(carrier.Id, mga.Id);
+            contractExpected1.Finished = true;
+            var contractExpected2 = ContractMock.Get(carrier.Id, mga.Id);
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected1, contractExpected2 });
         }
 
         #endregion Establish
@@ -240,10 +274,9 @@ namespace Insurance.Test.ComponentTests
             Terminate(model);
 
             // assertation
+            var contracts = MockRepository.Query<Contract>().ToList();
             var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
             contractExpected.Finished = true;
-
-            var contracts = MockRepository.Query<Contract>().ToList();
             contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
@@ -275,7 +308,8 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.InputInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         [Fact]
@@ -306,7 +340,8 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.IdInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         [Fact]
@@ -337,7 +372,8 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.IdInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         [Fact]
@@ -368,7 +404,8 @@ namespace Insurance.Test.ComponentTests
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.ContractInvalid);
 
             var contracts = MockRepository.Query<Contract>().ToList();
-            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contract });
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         [Fact]
@@ -397,6 +434,40 @@ namespace Insurance.Test.ComponentTests
 
             var contracts = MockRepository.Query<Contract>().ToList();
             contracts.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ContractTerminateWithContractFinished()
+        {
+            // arrange
+            var key = Fake.GetKey();
+            var carrier = CarrierMock.Get(key);
+
+            MockRepository.Add(carrier);
+
+            var key2 = Fake.GetKey();
+            var mga = MgaMock.Get(key2);
+
+            MockRepository.Add(mga);
+
+            var contract = ContractMock.Get(carrier.Id, mga.Id);
+            contract.Finished = true;
+            MockRepository.Add(contract);
+
+            MockRepository.Commit();
+
+            var model = ContractInputModelMock.Get(carrier.Id, mga.Id);
+
+            // act
+            Action action = () => Terminate(model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.ContractFinished);
+
+            var contracts = MockRepository.Query<Contract>().ToList();
+            var contractExpected = ContractMock.Get(carrier.Id, mga.Id);
+            contractExpected.Finished = true;
+            contracts.Should().BeEquivalentToEntity(new List<Contract>() { contractExpected });
         }
 
         #endregion Terminate

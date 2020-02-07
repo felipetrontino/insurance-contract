@@ -11,7 +11,8 @@ namespace Insurance.Domain.Common
         public const string LastNameInvalid = "Last name invalid.";
         public const string EntityNotFound = "Entity not found.";
         public const string ContractInvalid = "Contract invalid.";
-        public const string ContractNotExists = "Contract not exists";
         public const string ContractExists = "Contract exists.";
+        public const string ContractNotExists = "Contract not exists";
+        public const string ContractFinished = "Contract is finished.";
     }
 }

@@ -1,9 +1,9 @@
-﻿using Insurance.Domain.Common;
-using Insurance.Domain.Entities;
+﻿using Insurance.Application.Interfaces;
 using Insurance.Core.Exceptions;
 using Insurance.Core.Interfaces;
+using Insurance.Domain.Common;
+using Insurance.Domain.Entities;
 using Insurance.Domain.Interfaces.Model;
-using Insurance.Application.Interfaces;
 using Insurance.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace Insurance.Domain.Services
 {
     public abstract class ContractPartAppService<TInputModel, TViewModel, TEntity> : IContractPartAppService<TInputModel, TViewModel>
-        where TInputModel : class, IContractPart
+        where TInputModel : class, IContractPart, IValidate
         where TViewModel : class, IContractPart
         where TEntity : class, IContractPartEntity
     {
@@ -30,8 +30,7 @@ namespace Insurance.Domain.Services
             if (model == null)
                 throw new ValidationBusinessException(ValidationMessage.InputInvalid);
 
-            if (string.IsNullOrEmpty(model.Name))
-                throw new ValidationBusinessException(ValidationMessage.NameInvalid);
+            model.Validate();
 
             var entity = MapFromModel(model, null);
 
@@ -45,8 +44,7 @@ namespace Insurance.Domain.Services
             if (model == null)
                 throw new ValidationBusinessException(ValidationMessage.InputInvalid);
 
-            if (string.IsNullOrEmpty(model.Name))
-                throw new ValidationBusinessException(ValidationMessage.NameInvalid);
+            model.Validate();
 
             var entity = await _db.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id);
 

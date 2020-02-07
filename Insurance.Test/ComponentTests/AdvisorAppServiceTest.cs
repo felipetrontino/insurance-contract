@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
-using Insurance.Domain.Common;
-using Insurance.Domain.Entities;
-using Insurance.Core.Exceptions;
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
+using Insurance.Core.Exceptions;
+using Insurance.Domain.Common;
+using Insurance.Domain.Entities;
 using Insurance.Domain.Services;
 using Insurance.Infra.Data;
 using Insurance.Test.Common;
@@ -95,6 +95,44 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
+
+            var entities = MockRepository.Query<Advisor>().ToList();
+            entities.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void AdvisorAddEntityWithoutLastName()
+        {
+            // arrange
+            var key = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key);
+            model.LastName = null;
+
+            // act
+            Action action = () => Add(model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.LastNameInvalid);
+
+            var entities = MockRepository.Query<Advisor>().ToList();
+            entities.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void AdvisorAddEntityWithLastNameEmpty()
+        {
+            // arrange
+            var key = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key);
+            model.LastName = string.Empty;
+
+            // act
+            Action action = () => Add(model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.LastNameInvalid);
 
             var entities = MockRepository.Query<Advisor>().ToList();
             entities.Should().BeEmpty();
@@ -223,6 +261,60 @@ namespace Insurance.Test.ComponentTests
 
             // assertation
             action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.NameInvalid);
+
+            var entities = MockRepository.Query<Advisor>().ToList();
+            var entityExpected = AdvisorMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
+        }
+
+        [Fact]
+        public void AdvisorUpdateEntityWithoutLastNamee()
+        {
+            // arrange
+            var key = Fake.GetKey();
+
+            var entity = AdvisorMock.Get(key);
+            MockRepository.Add(entity);
+
+            MockRepository.Commit();
+
+            var key2 = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key2);
+            model.LastName = null;
+
+            // act
+            Action action = () => Update(entity.Id, model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.LastNameInvalid);
+
+            var entities = MockRepository.Query<Advisor>().ToList();
+            var entityExpected = AdvisorMock.Get(key);
+            entities.Should().BeEquivalentToEntity(new List<Advisor>() { entityExpected });
+        }
+
+        [Fact]
+        public void AdvisorUpdateEntityWithLastNameEmpty()
+        {
+            // arrange
+            var key = Fake.GetKey();
+
+            var entity = AdvisorMock.Get(key);
+            MockRepository.Add(entity);
+
+            MockRepository.Commit();
+
+            var key2 = Fake.GetKey();
+
+            var model = AdvisorInputModelMock.Get(key2);
+            model.LastName = string.Empty;
+
+            // act
+            Action action = () => Update(entity.Id, model);
+
+            // assertation
+            action.Should().Throw<ValidationBusinessException>().WithMessage(ValidationMessage.LastNameInvalid);
 
             var entities = MockRepository.Query<Advisor>().ToList();
             var entityExpected = AdvisorMock.Get(key);

@@ -1,15 +1,19 @@
-﻿using Insurance.Domain.Interfaces.Model;
+﻿using Insurance.Core.Exceptions;
+using Insurance.Core.Interfaces;
+using Insurance.Domain.Common;
 
 namespace Insurance.Application.Models.InputModel
 {
-    public class AdvisorInputModel : IContractPart
+    public class AdvisorInputModel : ContractPartInputModel, IValidate
     {
-        public string Name { get; set; }
-
         public string LastName { get; set; }
 
-        public string Address { get; set; }
+        public override void Validate()
+        {
+            base.Validate();
 
-        public string Phone { get; set; }
+            if (string.IsNullOrEmpty(this.LastName))
+                throw new ValidationBusinessException(ValidationMessage.LastNameInvalid);
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace Insurance.Domain.Common
         public const string InputInvalid = "Input invalid.";
         public const string IdInvalid = "Id invalid";
         public const string NameInvalid = "Name invalid.";
+        public const string LastNameInvalid = "Last name invalid.";
         public const string EntityNotFound = "Entity not found.";
         public const string ContractInvalid = "Contract invalid.";
         public const string ContractNotExists = "Contract not exists";

@@ -11,22 +11,20 @@ import { VisualizationService } from "../services/visualization.service";
 })
 export class ListAllComponent implements OnInit { 
   nodes: any[];
-  edges: any[];
-  nodes$: Observable<Node[]>;
-  edges$: Observable<Edge[]>;
+  edges: any[];  
 
   constructor(private router: Router, private service: VisualizationService) { }
 
   ngOnInit() {
     this.nodes = [];
     this.edges = [];
+    
     this.loadModels();
   }
 
-  loadModels() {
-    this.nodes$ =this.service.getNodes();
+  loadModels() {   
 
-    this.nodes$.subscribe(items => {
+    this.service.getNodes().subscribe(items => {
       for (var i = 0; i < items.length; i++) {
         let item = items[i];
 
@@ -35,10 +33,9 @@ export class ListAllComponent implements OnInit {
           label: item.name,
         });
       }    
-    });
-
-    this.edges$ =this.service.getEdges();
-    this.edges$.subscribe(items => {
+    }); 
+    
+    this.service.getEdges().subscribe(items => {
       for (var i = 0; i < items.length; i++) {
         let item = items[i];
 

@@ -1,5 +1,5 @@
 <h1>Visualization</h1>
-<div id="graph" min-heigth="100%">
+<div id="graph" style="display: grid;" *ngIf="nodes?.length > 0 && edges?.length > 0">
   <ngx-graph class="chart-container"
              [autoCenter]="true"
              [legend]="true"

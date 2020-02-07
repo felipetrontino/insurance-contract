@@ -62,7 +62,7 @@ export class ListContractComponent implements OnInit {
 
     this.service.findShortestPath(model)
       .subscribe(data => {
-        this.result = data.map(x => x.name).join(" => ");        
+        this.result = data.length ? data.map(x => x.name).join(" => ") : 'No contracts';        
       });
   };
 }

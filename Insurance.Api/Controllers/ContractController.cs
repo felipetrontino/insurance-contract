@@ -2,7 +2,6 @@
 using Insurance.Application.Models.InputModel;
 using Insurance.Application.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -79,10 +78,9 @@ namespace Insurance.WebApi.Controllers
         [Route("FindShortestPath")]
         [ProducesResponseType(typeof(List<ContractPartViewModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> FindShortestPath([FromQuery] Guid fromId, [FromQuery] Guid toId)
+        public async Task<IActionResult> FindShortestPath([FromQuery] ContractInputModel model)
         {
-            var input = new ContractInputModel() { FromId = fromId, ToId = toId };
-            return Ok(await _service.FindShortestPath(input));
+            return Ok(await _service.FindShortestPath(model));
         }
     }
 }
